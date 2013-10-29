@@ -76,9 +76,13 @@ def taleo_test():
     neclogger(request.query_string, True, True)
 
     print "make_response..."
+    return render_template('home.html', taleo_data=request.query_string)
     resp = make_response(render_template('home.html', taleo_data=request.query_string),200)
     print "after make_response"
     resp.headers['X-Frame-Options'] = 'ALLOW'
+    print resp
+    print resp.headers
+    print resp.data
     return resp
 
 
