@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask
+from flask import Flask, render_template
 from flask import request
 from flask import Response
 from time import clock, time
@@ -48,6 +48,12 @@ def home_url():
     # print 'Hit on default url'
     # print  request.url
     
+ 
+    taleo_data = 'Taleo Test'
+    neclogger(request.query_string, True, True)
+    
+    return render_template('home.html', taleo_data=request.query_string)
+
     d = os.environ.get('DEBUG', False)
     print d
     if d:
