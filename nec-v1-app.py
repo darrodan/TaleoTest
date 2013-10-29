@@ -52,8 +52,8 @@ def home_url():
     taleo_data = 'Taleo Test'
     neclogger(request.query_string, True, True)
     
-    return render_template('home.html')
-    # return render_template('home.html', taleo_data=request.query_string)
+    
+    return render_template('home.html', taleo_data=request.query_string)
 
     d = os.environ.get('DEBUG', False)
     print d
