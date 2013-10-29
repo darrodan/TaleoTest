@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask, render_template
+from flask import Flask, render_template, make_response
 from flask import request
 from flask import Response
 from time import clock, time
@@ -51,7 +51,7 @@ def home_url():
  
     taleo_data = 'Taleo Test'
     neclogger(request.query_string, True, True)
-    
+
     
     return render_template('home.html', taleo_data=request.query_string)
 
@@ -68,6 +68,36 @@ def home_url():
     resp = Response(js, status=200, mimetype='application/json')
     
     return resp
+
+@app.route('/taleotest')
+def taleo_test():   
+ 
+    taleo_data = 'Taleo Test'
+    neclogger(request.query_string, True, True)
+
+    print "make_response..."
+    resp = make_response(render_template('home.html', taleo_data=request.query_string),200)
+    print "after make_response"
+    resp.headers['X-Frame-Options'] = 'ALLOW'
+    return resp
+
+
+    # return render_template('home.html', taleo_data=request.query_string)
+
+    # d = os.environ.get('DEBUG', False)
+    # print d
+    # if d:
+    #    print request.query_string
+    #    print debug
+    #    print domainOverride
+        
+    
+    # data = 'Nymble NEC'
+    # js = json.dumps(data)
+    # resp = Response(js, status=200, mimetype='application/json')
+    
+    # return resp
+
 
 @app.route('/favicon.ico')
 def favicon():
