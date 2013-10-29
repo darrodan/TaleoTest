@@ -93,7 +93,7 @@ def a_taleo():
     qsdata= request.query_string
     qs = urlparse.parse_qs(qsdata)
     # write log entry
-    neclogger(qsdata,True, False)
+    neclogger(qsdata,True, True)
 
     data = qsdata
     js = json.dumps(data)
