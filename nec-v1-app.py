@@ -28,6 +28,10 @@ whitelistCache = []
 debugSwitch = False
 domainOverride = False
 
+taleoAPIUsername = 'chequedtaleoapitest'
+taleoAPIPassword = 'pwd4taleoapi'
+taleoAPICompany = 'CHEQUED'
+
 #
 # General logging method for NEC
 # 
@@ -69,11 +73,50 @@ def home_url():
     
     return resp
 
+def taleoAPISetup():
+
+    dispatcherURL = "https://tbe.taleo.net/MANAGER/dispatche1/serviceUrl/CHEQUED"
+    testURL = "https://app.chequed.com"
+    loginURL = "https://ch.tbe.taleo.net/CH07/ats/api/v1/login"
+    loginParams = '{ "orgCode" : "CHEQUED"}, { "userName" : "chequedtaleoapitest" }, { "password" : "pwd4taleoapi"}'
+    dispatcherHeaders = {'Content-type': 'application/json'}
+    
+    print dispatcherURL
+    r = requests.get(testURL, headers=dispatcherHeaders)
+    print r
+    # print t.text
+    neclogger(r.json, True, True)
+    return True
+    
+#curl -k -X POST "https://ch.tbe.taleo.net/CH07/ats/api/v1/login?orgCode=CHEQUED&userName=chequedtaleoapitest&password=pwd4taleoapi"
+ 
+ #"Content-Type: application/json" -H "Cookie: authToken=webapi2-1796325871408428851"
+ 
+#{"response":{"URL":"https://ch.tbe.taleo.net/CH07/ats/api/v1/"},"status":{"detail":{},"success":true}}macbook-pro-dev:apites
+
+ #  docs = docs.rstrip("\r\n")
+ #   d = '{ "docs": [' + docs + ' ]}'
+ #   #print d
+    # jd = json.loads(d)
+ #   headers = {'content-type': 'application/json'}, {'Cookie': 'authToken='}
+    #print bulkdocsURL
+    #print alldocsURL
+  #  r = requests.post(bulkdocsURL, auth=('rodan','pwd4nsyrt'), headers=headers, data=d)
+
+
+
 @app.route('/taleotest')
 def taleo_test():   
  
     taleo_data = 'Taleo Test'
     neclogger(request.query_string, True, True)
+    
+    print "test google"
+    dispatcherHeaders = {'Content-type': 'application/json'}
+    r = requests.get("http://www.google.com",headers=dispatcherHeaders)
+    print r
+    
+    taleoAPISetup()
 
     print "make_response..."
     return render_template('home.html', taleo_data=request.query_string)
@@ -84,6 +127,11 @@ def taleo_test():
     print resp.headers
     print resp.data
     return resp
+
+# curl -k -X POST "https://ch.tbe.taleo.net/CH07/ats/api/v1/login?orgCode=CHEQUED&userName=chequedtaleoapitest&password=pwd4taleoapi"
+
+# curl https://tbe.taleo.net/MANAGER/dispatche1/serviceUrl/CHEQUED
+# {"response":{"URL":"https://ch.tbe.taleo.net/CH07/ats/api/v1/"},"status":{"detail":{},"success":true}}macbook-pro-dev:apitest
 
 
     # return render_template('home.html', taleo_data=request.query_string)
