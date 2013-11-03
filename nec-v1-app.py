@@ -5,18 +5,21 @@ from flask import request
 from flask import Response
 from time import clock, time
 from werkzeug.useragents import UserAgent
+from urlparse import urlparse, parse_qs
 
 import logging
-import urlparse
 import json
 import datetime as dt
 import requests
+import httplib
 
 file_handler = logging.FileHandler('./app.log')
 USE_X_FORWARDED_HOST = True
 
 app = Flask(__name__)
 debug = False
+
+httplib.HTTPConnection.debuglevel = 1
 
 kinveyBaseURL = 'https://baas.kinvey.com'
 kinveyAppKey = 'kid_PPxAbHjIxJ'
@@ -75,17 +78,64 @@ def home_url():
 
 def taleoAPISetup():
 
-    dispatcherURL = "https://tbe.taleo.net/MANAGER/dispatche1/serviceUrl/CHEQUED"
+    dispatcherURL = "https://tbe.taleo.net/MANAGER/dispatcher/api/v1/serviceUrl/CHEQUED"
     testURL = "https://app.chequed.com"
+    currentAPIURL = None
     loginURL = "https://ch.tbe.taleo.net/CH07/ats/api/v1/login"
-    loginParams = '{ "orgCode" : "CHEQUED"}, { "userName" : "chequedtaleoapitest" }, { "password" : "pwd4taleoapi"}'
-    dispatcherHeaders = {'Content-type': 'application/json'}
+    basicHeaders = '{"Content-type": "application/json"}'
+    taleoHeaders = '"Content-type": "application/json", "Cookie": "authToken={authToken}"'
+    
     
     print dispatcherURL
-    r = requests.get(testURL, headers=dispatcherHeaders)
+    print basicHeaders
+    baseHeader = json.loads(basicHeaders)
+    print baseHeader
+    r = requests.get(dispatcherURL, headers=baseHeader)
     print r
-    # print t.text
-    neclogger(r.json, True, True)
+    print r.json()
+    print r.text
+    
+    s = r.text
+    responseEntries = json.loads(s)
+    respEntry = responseEntries['response']
+    print respEntry
+    currentAPIURL = respEntry['URL']
+    print currentAPIURL
+    
+    if currentAPIURL:
+        loginURL = currentAPIURL + "/login"
+    else:
+        neclogger("no api url", True, True)
+        return False
+    
+    userName = "chequedtaleoapitest"
+    password = "pwd4taleoapi"
+    orgCode = "CHEQUED"
+    #loginParams = '"orgCode":" ' + orgCode + '",' + '"userName":" + userName + '"," + '"password":"' + password + '"'
+    loginParams = '?orgCode=' + orgCode + '&userName=' + userName + '&password=' + password
+ 
+    print loginParams
+    print loginURL
+    
+    r = requests.post(loginURL+loginParams,headers=json.loads(basicHeaders))
+    print r
+    print r.json()
+    print r.text
+
+    s = r.text
+    responseEntries = json.loads(s)
+    respEntry = responseEntries['response']
+    print "respEntry"
+    print respEntry
+    authToken = respEntry['authToken']
+    print "authToken"
+    print authToken
+
+    print "taleoHeaders"
+    s = taleoHeaders.format(**locals())
+    print s
+    
+   # neclogger(r.json, True, True)
     return True
     
 #curl -k -X POST "https://ch.tbe.taleo.net/CH07/ats/api/v1/login?orgCode=CHEQUED&userName=chequedtaleoapitest&password=pwd4taleoapi"
@@ -115,8 +165,17 @@ def taleo_test():
     dispatcherHeaders = {'Content-type': 'application/json'}
     r = requests.get("http://www.google.com",headers=dispatcherHeaders)
     print r
-    
+    #print r.json
+    #chequedDispatcherURL = ""
+    #loginURL = chequedDispatcherURL + '/login'
+
     taleoAPISetup()
+    
+    qs = request.query_string
+    print qs
+    
+    qs = parse_qs(qs, keep_blank_values=True)
+    print qs
 
     print "make_response..."
     return render_template('home.html', taleo_data=request.query_string)
@@ -363,6 +422,11 @@ if d == "ON":
 else:
     domainOverride = False
 
+logging.basicConfig() 
+logging.getLogger().setLevel(logging.DEBUG)
+requests_log = logging.getLogger("requests.packages.urllib3")
+requests_log.setLevel(logging.DEBUG)
+requests_log.propagate = True
 
 # run if not being invoked via gunicorn
 if __name__ == '__main__':
