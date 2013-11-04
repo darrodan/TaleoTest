@@ -176,16 +176,53 @@ def taleo_test():
     
     qs = parse_qs(qs, keep_blank_values=True)
     print qs
+    print qs.values()
+    
+    #print qs['foo']
+    #print qs.get('foo')
+    #print qs['bar']
+    #print qs.get('bar')
+    
+    # Look for taleo parameters that come in every request
+    
+    reqID = None
+    x = None
+    for item in qs:
+        if item == 'Req_ID':
+            s = qs[item]
+            reqID = s[0]
+    print "reqID = " + reqID
+    
+    candID = None
+    x = None
+    for item in qs:
+        if item == 'cand_id':
+            s = qs[item]
+            candID = s[0]
+    print "candID = " + candID
+    
+    jobTitle = None
+    x = None
+    for item in qs:
+        if item == 'job_title':
+            s = qs[item]
+            jobTitle = s[0]
+    print "Job Title = " + jobTitle
+    
+    #print par['q'], par['p']
+    #Req_ID=3&cand_id=64&job_title=Bottle%20Washer&cjm=Bottle%20Washer&xx=&reqs=Bottle%20Washer%20-%20[BR-549]%20/%20Developer%20-%20[123]%20/%20Skilled%20Craftsman%20-%20[CHQ-001]&eeoc=
+    
 
     print "make_response..."
-    return render_template('home.html', taleo_data=request.query_string)
-    resp = make_response(render_template('home.html', taleo_data=request.query_string),200)
-    print "after make_response"
-    resp.headers['X-Frame-Options'] = 'ALLOW'
-    print resp
-    print resp.headers
-    print resp.data
-    return resp
+    return render_template('home.html', taleo_data=request.query_string, reqid=reqID, candid=candID, jobtitle=jobTitle)
+
+    #resp = make_response(render_template('home.html', taleo_data=request.query_string),200)
+    #print "after make_response"
+    #resp.headers['X-Frame-Options'] = 'ALLOW'
+    #print resp
+    #print resp.headers
+    #print resp.data
+    #return resp
 
 # curl -k -X POST "https://ch.tbe.taleo.net/CH07/ats/api/v1/login?orgCode=CHEQUED&userName=chequedtaleoapitest&password=pwd4taleoapi"
 
