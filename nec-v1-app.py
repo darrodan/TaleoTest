@@ -172,10 +172,10 @@ def taleo_test():
     taleoAPISetup()
     
     qs = request.query_string
-    print qs
+    neclogger(qs, True, True)
     
     qs = parse_qs(qs, keep_blank_values=True)
-    print qs
+    neclogger(qs, True, True)
     print qs.values()
     
     #print qs['foo']
@@ -191,7 +191,7 @@ def taleo_test():
         if item == 'Req_ID':
             s = qs[item]
             reqID = s[0]
-    print "reqID = " + reqID
+    neclogger( "reqID = " + reqID, True, True)
     
     candID = None
     x = None
@@ -199,7 +199,7 @@ def taleo_test():
         if item == 'cand_id':
             s = qs[item]
             candID = s[0]
-    print "candID = " + candID
+    neclogger("candID = " + candID, True, True)
     
     jobTitle = None
     x = None
@@ -207,7 +207,8 @@ def taleo_test():
         if item == 'job_title':
             s = qs[item]
             jobTitle = s[0]
-    print "Job Title = " + jobTitle
+    neclogger("Job Title = " + jobTitle, True, True)
+    
     
     #print par['q'], par['p']
     #Req_ID=3&cand_id=64&job_title=Bottle%20Washer&cjm=Bottle%20Washer&xx=&reqs=Bottle%20Washer%20-%20[BR-549]%20/%20Developer%20-%20[123]%20/%20Skilled%20Craftsman%20-%20[CHQ-001]&eeoc=
