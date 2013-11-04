@@ -12,6 +12,7 @@ import json
 import datetime as dt
 import requests
 import httplib
+import re
 
 file_handler = logging.FileHandler('./app.log')
 USE_X_FORWARDED_HOST = True
@@ -34,6 +35,7 @@ domainOverride = False
 taleoAPIUsername = 'chequedtaleoapitest'
 taleoAPIPassword = 'pwd4taleoapi'
 taleoAPICompany = 'CHEQUED'
+
 
 #
 # General logging method for NEC
@@ -104,6 +106,7 @@ def taleoAPISetup():
     
     if currentAPIURL:
         loginURL = currentAPIURL + "/login"
+        logoutURL = currentAPIURL + "/logout"
     else:
         neclogger("no api url", True, True)
         return False
@@ -132,8 +135,17 @@ def taleoAPISetup():
     print authToken
 
     print "taleoHeaders"
-    s = taleoHeaders.format(**locals())
+    s = "{" + taleoHeaders.format(**locals()) + "}"
     print s
+    print type(s)
+    print json.loads(s)
+    
+    print "make sure to logout..."
+    print logoutURL
+    r = requests.post(logoutURL, headers=json.loads(s))
+    print r
+    print r.json()
+    print r.text
     
    # neclogger(r.json, True, True)
     return True
@@ -194,7 +206,6 @@ def taleo_test():
     neclogger( "reqID = " + reqID, True, True)
     
     candID = None
-    x = None
     for item in qs:
         if item == 'cand_id':
             s = qs[item]
@@ -202,12 +213,49 @@ def taleo_test():
     neclogger("candID = " + candID, True, True)
     
     jobTitle = None
-    x = None
     for item in qs:
         if item == 'job_title':
             s = qs[item]
             jobTitle = s[0]
     neclogger("Job Title = " + jobTitle, True, True)
+    
+    cjm = None
+    for item in qs:
+        if item == 'cjm':
+            s = qs[item]
+            cjm = s[0]
+    neclogger("cjm = " + cjm, True, True)
+    
+    reqs = None
+    for item in qs:
+        if item == 'reqs':
+            s = qs[item]
+            reqs = s[0]
+    neclogger("reqs = " + reqs, True, True)
+    
+    # get all the reqs
+    
+    viewReqs = 'reqs are: '
+    reqStr = ""
+    listofreqs = reqs.split('/')
+    reTitle = re.compile('.* -')
+    reJobCode = re.compile('- \[.*\]')
+    for i, val in enumerate(listofreqs):
+        req = val
+        neclogger("req = " + req, True, True)
+        s = reTitle.search(req)
+        m = s.group()
+        mtitle = m[0:-1]
+        s = reJobCode.search(req)
+        m = s.group()
+        mjobCode = m[3:-1]
+        neclogger("reqTitle = " + mtitle, True, True)
+        neclogger("reqJocCode = " + mjobCode, True, True)
+        reqStr = reqStr + "\n\t\t title = " + mtitle + "jobCode = " + mjobCode
+    viewReqs = viewReqs + reqStr
+     
+        
+        
     
     
     #print par['q'], par['p']
@@ -215,7 +263,14 @@ def taleo_test():
     
 
     print "make_response..."
-    return render_template('home.html', taleo_data=request.query_string, reqid=reqID, candid=candID, jobtitle=jobTitle)
+    return render_template('home.html',
+                           taleo_data=request.query_string,
+                           reqid=reqID,
+                           candid=candID,
+                           jobtitle=jobTitle,
+                           chequedJobMapping=cjm,
+                           requisitions=reqs,
+                           reqDetails=viewReqs)
 
     #resp = make_response(render_template('home.html', taleo_data=request.query_string),200)
     #print "after make_response"
